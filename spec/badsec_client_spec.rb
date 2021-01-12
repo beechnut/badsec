@@ -10,31 +10,40 @@ RSpec.describe Badsec::Client do
 
   context "endpoint failure" do
     context "once" do
-      # stub_request(:any, "localhost:8888/users").
-      #   to_return({ status: 500 }).then.
-      #   to_return({ status: 200 })
+      it "returns a response" do
+        stub_request(:any, "http://localhost:8888/users").
+          to_return({ status: 500 }).then.
+          to_return({ status: 200, body: "9757263792576857988\n7789651288773276582\n1628388650278268240" })
+        expect(subject.users).to eq(
+          ["9757263792576857988", "7789651288773276582", "1628388650278268240"]
+        )
+      end
     end
 
     context "twice" do
-      # stub_request(:any, "localhost:8888/auth").
-      #   to_return({ status: 500 }).times(2).then.
-      #   to_return({ status: 200 })
+      it "returns a response" do
+        stub_request(:any, "http://localhost:8888/auth").
+          to_return({ status: 500 }).times(2).then.
+          to_return({ status: 200, headers: { 'Badsec-Authentication-Token': 'h4ck1n9' } })
+        subject.auth
+        subject.auth_token == 'h4ck1n9'
+      end
     end
 
     context "thrice" do
-      # stub_request(:any, "localhost:8888/users").
-      #   to_return({ status: 500 }).times(3)
+      it "raises a failure condition" do
+        stub_request(:any, "http://localhost:8888/users").
+          to_return({ status: 500 }).times(3)
+        expect { subject.users }.to raise_error(Badsec::Error)
+      end
     end
   end
 
-  it "exits with a non-zero status code to indicate failure if the call fails 3 times in a row"
-
   describe "#auth" do
-
     let(:client) { Badsec::Client.new }
 
     it "requests the Badsec-Authentication-Token in the header" do
-      stub_request(:any, "localhost:8888/auth").
+      stub_request(:any, "http://localhost:8888/auth").
         to_return({ headers: { 'Badsec-Authentication-Token': 'h4ck1n9' }})
       client.auth # Make the request
       expect(client.auth_token).to eq('h4ck1n9')
@@ -54,9 +63,9 @@ RSpec.describe Badsec::Client do
 
     context "with an auth token" do
       it "does not request an auth token" do
-        stub_request(:get, "localhost:8888/users")
+        stub_request(:get, "http://localhost:8888/users")
         client.users
-        expect(WebMock).not_to have_requested(:head, "localhost:8888/auth")
+        expect(WebMock).not_to have_requested(:head, "http://localhost:8888/auth")
       end
     end
 
@@ -64,18 +73,18 @@ RSpec.describe Badsec::Client do
       let(:client) { Badsec::Client.new() }
 
       it "requests an auth token first" do
-        stub_request(:get, "localhost:8888/users")
-        stub_request(:head, "localhost:8888/auth").
+        stub_request(:get, "http://localhost:8888/users")
+        stub_request(:head, "http://localhost:8888/auth").
           to_return(headers: { 'Badsec-Authentication-Token': 'f4k3' })
         client.users
-        expect(WebMock).to have_requested(:head, "localhost:8888/auth")
+        expect(WebMock).to have_requested(:head, "http://localhost:8888/auth")
       end
     end
 
     it "sends X-Request-Checksum header to the /users endpoint" do
-      stub_request(:get, "localhost:8888/users")
+      stub_request(:get, "http://localhost:8888/users")
       client.users
-      expect(WebMock).to have_requested(:get, "localhost:8888/users").
+      expect(WebMock).to have_requested(:get, "http://localhost:8888/users").
         with(headers: {
           'X-Request-Checksum': 'c20acb14a3d3339b9e92daebb173e41379f9f2fad4aa6a6326a696bd90c67419'
         })

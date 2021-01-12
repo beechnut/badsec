@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require "badsec"
+
+# You can add fixtures and/or initialization code here to make experimenting
+# with your gem easier. You can also use a different console, if you like.
+
+if ARGV.empty?
+  puts <<~MSG
+
+    Gets a JSON-formatted list of users from the Badsec API.
+
+    usage: bin/cli command [AUTH_TOKEN]
+
+    Examples:
+      bin/cli get             # Requests auth key, then user list
+      bin/cli get AUTH_TOKEN  # Gets user list with specified auth key
+
+  MSG
+  exit 0
+end
+
+Badsec::CLI.new(*ARGV).perform ? exit(0) : exit(1)

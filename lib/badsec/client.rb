@@ -14,10 +14,11 @@ class Badsec::Client
   end
 
   def users
+    return @users if @users
     auth unless auth_token
     opts = { headers: { 'X-Request-Checksum': checksum }}
     response = request_with_retries(:get, '/users', opts)
-    puts response
+    @users = response.body.split("\n")
   end
 
   def checksum(path = '/users')
@@ -31,7 +32,7 @@ class Badsec::Client
 
     request_class = Net::HTTP.const_get(http_method.to_s.capitalize)
     req = request_class.new(uri)
-    opts[:headers].to_a.each { |k, v| puts "#{k}: #{v}" ; req[k] = v }
+    opts[:headers].to_a.each { |k, v| req[k] = v }
 
     with_retries do
       Net::HTTP.start(url.hostname, url.port, { read_timeout: 2 }) do |http|
@@ -41,8 +42,7 @@ class Badsec::Client
   end
 
   def with_retries(num = 3, &block)
-    until num == 0
-      # msg(num)
+    loop do
       begin
         res = yield
         break(res) if res.code == '200'
@@ -50,16 +50,9 @@ class Badsec::Client
         # NO OP
       end
       num = num - 1
-    end
-  end
-
-  def msg(num)
-    case num
-    when 3 then puts "try"
-    when 1..2 then
-      puts "-> fail -> retry"
-    else
-      puts "-> exit"
+      if num == 0
+        raise Badsec::Error, "Bad connection to API (retried 3 times)"
+      end
     end
   end
 end
