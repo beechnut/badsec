@@ -1,0 +1,2 @@
+class Badsec::CLI
+end
