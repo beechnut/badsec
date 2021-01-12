@@ -1,38 +1,39 @@
 # Badsec
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/badsec`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
-
 ## Installation
 
-Add this line to your application's Gemfile:
+First, clone the repository and `cd` into it. Then, run `bundle install` to install dependencies.
 
-```ruby
-gem 'badsec_client'
-```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install badsec_client
+    $ git clone https://github.com/beechnut/badsec.git
+    $ cd badsec
+    $ bundle install
 
 ## Usage
 
-TODO: Write usage instructions here
+To get a list of IDs, run the `get` command. This will request an auth token from the server, then return a JSON-formatted list of IDs.
 
-## Development
+    $ bundle exec bin/cli get
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+Results are always JSON-formatted, meaning you can pipe them to `jq` or do other useful things. For example, to get the first 3 IDs, you can run:
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+    $ bundle exec bin/cli get | jq '.[0:3]'
+
+If you have an auth token already, you can provide it as a second argument. This will skip the request to the server's `/auth` endpoint.
+
+    $ bundle exec bin/cli get AUTH_TOKEN_HERE | jq '.[0:3]'
+
+## Roadmap
+
+Future work includes:
+
+- Adding a HOST option to the CLI, to allow easy switching between staging / production API endpoints.
+- Incremental waiting upon each URL retry, so as not to overload the server upon failure.
+- Removing exceptions as a control flow mechanism.
+- Local storage of authorization token, to reduce load on server.
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/badsec_client. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at https://github.com/beechnut/badsec. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 ## License
 
@@ -40,4 +41,4 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 ## Code of Conduct
 
-Everyone interacting in the BadsecClient project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/badsec_client/blob/master/CODE_OF_CONDUCT.md).
+Everyone interacting in the Badsec project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/badsec_client/blob/master/CODE_OF_CONDUCT.md).
