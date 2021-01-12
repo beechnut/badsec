@@ -8,6 +8,10 @@ First, clone the repository and `cd` into it. Then, run `bundle install` to inst
     $ cd badsec
     $ bundle install
 
+Run the tests to ensure everything is in good working order:
+
+    $ bundle exec rspec
+
 ## Usage
 
 To get a list of IDs, run the `get` command. This will request an auth token from the server, then return a JSON-formatted list of IDs.
